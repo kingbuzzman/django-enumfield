@@ -63,7 +63,7 @@ def patch_sqlite_connection():
 class PersonForm(forms.ModelForm):
     class Meta:
         model = Person
-        fields = ("status",)
+        fields = ("status", "civil_status")
 
 
 class EnumFieldTest(TestCase):
@@ -159,7 +159,7 @@ class EnumFieldTest(TestCase):
 
     def test_enum_field_modelform_create(self):
         request_factory = RequestFactory()
-        request = request_factory.post("", data={"status": "2"})
+        request = request_factory.post("", data={"status": "2", "civil_status": "MARRIED"})
         form = PersonForm(request.POST)
         self.assertTrue(isinstance(form.fields["status"], forms.TypedChoiceField))
         self.assertTrue(form.is_valid())
@@ -174,14 +174,18 @@ class EnumFieldTest(TestCase):
         person = Person.objects.create()
 
         request_factory = RequestFactory()
-        request = request_factory.post("", data={"status": "2"})
+        request = request_factory.post("", data={"status": "2", "civil_status": "MARRIED"})
         form = PersonForm(request.POST, instance=person)
         self.assertTrue(isinstance(form.fields["status"], forms.TypedChoiceField))
         self.assertTrue(form.is_valid())
         form.save()
         self.assertTrue(person.status, PersonStatus.DEAD)
 
-        request = request_factory.post("", data={"status": "99"})
+        request = request_factory.post("", data={"status": "99", "civil_status": "MARRIED"})
+        form = PersonForm(request.POST, instance=person)
+        self.assertFalse(form.is_valid())
+
+        request = request_factory.post("", data={"status": "2", "civil_status": "UNKNOWN"})
         form = PersonForm(request.POST, instance=person)
         self.assertFalse(form.is_valid())
 

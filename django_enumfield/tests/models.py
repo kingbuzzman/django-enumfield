@@ -2,10 +2,10 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from django_enumfield.db.fields import EnumField
-from django_enumfield.enum import Enum
+from django_enumfield.enum import IntEnum, StrEnum
 
 
-class LampState(Enum):
+class LampState(IntEnum):
     OFF = 0
     ON = 1
 
@@ -16,7 +16,7 @@ class Lamp(models.Model):
     state = EnumField(LampState, verbose_name="stately_state")
 
 
-class PersonStatus(Enum):
+class PersonStatus(IntEnum):
     UNBORN = 0
     ALIVE = 1
     DEAD = 2
@@ -31,7 +31,7 @@ class PersonStatus(Enum):
     }
 
 
-class PersonStatusDefault(Enum):
+class PersonStatusDefault(IntEnum):
     UNBORN = 0
     ALIVE = 1
     DEAD = 2
@@ -41,16 +41,24 @@ class PersonStatusDefault(Enum):
     __default__ = UNBORN
 
 
+class PersonCivilStatus(StrEnum):
+    MARRIED = "MARRIED"
+    SINGLE = "SINGLE"
+    DIVORCED = "DIVORCED"
+    WIDOWED = "WIDOWED"
+
+
 class Person(models.Model):
     example = models.CharField(max_length=100, default="foo")
     status = EnumField(PersonStatus, default=PersonStatus.ALIVE)
+    civil_status = models.CharField(choices=PersonCivilStatus.choices(), default=PersonCivilStatus.SINGLE, max_length=50)
 
     def save(self, *args, **kwargs):
         super(Person, self).save(*args, **kwargs)
         return "Person.save"
 
 
-class BeerStyle(Enum):
+class BeerStyle(IntEnum):
     LAGER = 0
     STOUT = 1
     WEISSBIER = 2
@@ -58,7 +66,7 @@ class BeerStyle(Enum):
     __default__ = LAGER
 
 
-class BeerState(Enum):
+class BeerState(IntEnum):
     FIZZY = 0
     STALE = 1
     EMPTY = 2
@@ -66,7 +74,7 @@ class BeerState(Enum):
     __default__ = FIZZY
 
 
-class LabelBeer(Enum):
+class LabelBeer(IntEnum):
     STELLA = 0
     JUPILER = 1
     TYSKIE = 2

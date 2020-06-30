@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 import logging
-from enum import Enum as NativeEnum, IntEnum as NativeIntEnum
+from enum import Enum as NativeEnum
 from typing import Any, Dict, List, Optional, Sequence, Tuple, TypeVar, Union, cast
 
 import six
@@ -41,7 +41,7 @@ T = TypeVar("T", bound="Enum")
 
 
 @six.python_2_unicode_compatible
-class Enum(NativeIntEnum):
+class StrEnum(NativeEnum):
     """ A container for holding and restoring enum values """
 
     __labels__ = {}  # type: Dict[int, six.text_type]
@@ -120,7 +120,7 @@ class Enum(NativeIntEnum):
         :return Default value, if set.
         """
         if cls.__default__ is not None:
-            return cast(Enum, cls(cls.__default__))
+            return cast(cls, cls(cls.__default__))
 
     @classmethod
     def field(cls, **kwargs):
@@ -219,4 +219,14 @@ class Enum(NativeIntEnum):
         """
         if isinstance(to_value, cls):
             to_value = to_value.value
-        return cast(Sequence[int], cls.__transitions__.get(to_value, []))
+        cast_type = Sequence[str]
+        if issubclass(cls, int):
+            cast_type = Sequence[int]
+        return cast(cast_type, cls.__transitions__.get(to_value, []))
+
+
+class IntEnum(int, StrEnum):
+    pass
+
+
+Enum = IntEnum
